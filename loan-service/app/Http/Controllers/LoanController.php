@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Loan;
+use App\Jobs\BookLoanJob;
 
 class LoanController extends Controller
 {
@@ -24,30 +25,30 @@ class LoanController extends Controller
         return response()->json($loan);
     }
 
-public function returnBook($id)
-{
-    $loan = Loan::find($id);
+    public function returnBook($id)
+    {
+        $loan = Loan::find($id);
 
-    if (!$loan) {
-        return response()->json(['message' => 'Loan tidak ditemukan'], 404);
+        if (!$loan) {
+            return response()->json(['message' => 'Loan tidak ditemukan'], 404);
+        }
+
+        if ($loan->status === 'dikembalikan') {
+            return response()->json(['message' => 'Buku sudah dikembalikan'], 400);
+        }
+
+        $loan->update([
+            'return_date' => now(),
+            'status' => 'dikembalikan'
+        ]);
+
+        Http::put("http://book-service:8000/api/books/$loan->book_id/add-stock");
+
+        return response()->json([
+            'message' => 'Buku berhasil dikembalikan',
+            'data' => $loan
+        ]);
     }
-
-    if ($loan->status === 'dikembalikan') {
-        return response()->json(['message' => 'Buku sudah dikembalikan'], 400);
-    }
-
-    $loan->update([
-        'return_date' => now(),
-        'status' => 'dikembalikan'
-    ]);
-
-    Http::put("http://127.0.0.1:8002/api/books/$loan->book_id/add-stock");
-
-    return response()->json([
-        'message' => 'Buku berhasil dikembalikan',
-        'data' => $loan
-    ]);
-}
 
     public function store(Request $request)
     {
@@ -60,7 +61,7 @@ public function returnBook($id)
         $bookId = $request->book_id;
 
         // 🔥 CEK USER
-        $userResponse = Http::get("http://127.0.0.1:8001/api/users/$userId");
+        $userResponse = Http::get("http://user-service:8000/api/users/$userId");
 
         if ($userResponse->failed()) {
             return response()->json([
@@ -69,7 +70,7 @@ public function returnBook($id)
         }
 
         // 🔥 CEK BOOK
-        $bookResponse = Http::get("http://127.0.0.1:8002/api/books/$bookId");
+        $bookResponse = Http::get("http://book-service:8000/api/books/$bookId");
 
         if ($bookResponse->failed()) {
             return response()->json([
@@ -93,14 +94,15 @@ public function returnBook($id)
             ], 400);
         }
 
-        Http::put("http://127.0.0.1:8002/api/books/$bookId/reduce-stock");
+        // ✅ Dispatch async ke RabbitMQ — book-service yang kurangi stok
+        BookLoanJob::dispatch($bookId)->onQueue('book-loan');
 
         // 🔥 SIMPAN LOAN
         $loan = Loan::create([
             'user_id' => $userId,
             'book_id' => $bookId,
-            'loan_date' => now(),     
-            'return_date' => null,     
+            'loan_date' => now(),
+            'return_date' => null,
             'status' => 'dipinjam'
         ]);
 

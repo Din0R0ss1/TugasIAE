@@ -341,7 +341,7 @@ async function kembalikan(id) {
     if (!confirm("Yakin buku sudah dikembalikan?")) return;
 
     try {
-     const res = await fetch(`http://127.0.0.1:8003/api/loans/${id}/return`, {
+     const res = await fetch(`http://localhost:8003/api/loans/${id}/return`, {
      method: 'PUT'
      });
 
@@ -371,7 +371,7 @@ async function tambahPeminjaman() {
     }
 
     try {
-        const res = await fetch('http://127.0.0.1:8003/api/loans', {
+        const res = await fetch('http://localhost:8003/api/loans', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -412,7 +412,7 @@ async function tambahBuku() {
         return;
     }
 
-    const res = await fetch('http://127.0.0.1:8002/api/books', {
+    const res = await fetch('http://localhost:8002/api/books', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ judul, penulis, stok })
@@ -445,7 +445,7 @@ function editBuku(id, judul, penulis, stok) {
 }
 
 async function updateBuku(id, judul, penulis, stok) {
-    const res = await fetch(`http://127.0.0.1:8002/api/books/${id}`, {
+    const res = await fetch(`http://localhost:8002/api/books/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ judul, penulis, stok })
@@ -472,7 +472,7 @@ async function tambahUser() {
     }
 
     try {
-        const res = await fetch('http://127.0.0.1:8001/api/users', {
+        const res = await fetch('http://localhost:8001/api/users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
