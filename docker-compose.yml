@@ -13,9 +13,10 @@ services:
       - user-service
       - book-service
       - loan-service
+    volumes:
+      - gateway-db-data:/app/database
     networks:
       - perpus-network
-
   user-service:
     build: ./user-service
     ports:
@@ -33,7 +34,6 @@ services:
       - rabbitmq
     networks:
       - perpus-network
-
   book-service:
     build: ./book-service
     ports:
@@ -51,7 +51,6 @@ services:
       - rabbitmq
     networks:
       - perpus-network
-
   loan-service:
     build: ./loan-service
     ports:
@@ -69,7 +68,6 @@ services:
       - rabbitmq
     networks:
       - perpus-network
-
   # ===== BOOK WORKER =====
   book-worker:
     build: ./book-service
@@ -89,6 +87,25 @@ services:
     networks:
       - perpus-network
     command: bash -c "sleep 15 && php artisan queue:work --queue=book-loan --tries=3"
+  # ===== LOAN HISTORY WORKER (NEW) =====
+  loan-history-worker:
+    build: ./user-service
+    environment:
+      - APP_ENV=local
+      - APP_KEY=base64:GENERATE_YOUR_KEY
+      - DB_HOST=user-db
+      - DB_DATABASE=user_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - RABBITMQ_HOST=rabbitmq
+      - QUEUE_CONNECTION=rabbitmq
+      - CACHE_STORE=file
+    depends_on:
+      - user-db
+      - rabbitmq
+    networks:
+      - perpus-network
+    command: bash -c "sleep 15 && php artisan queue:work --queue=loan-history --tries=3"
   # ===== DATABASES =====
   user-db:
     image: mysql:8.0
@@ -99,7 +116,6 @@ services:
       - user-db-data:/var/lib/mysql
     networks:
       - perpus-network
-
   book-db:
     image: mysql:8.0
     environment:
@@ -109,7 +125,6 @@ services:
       - book-db-data:/var/lib/mysql
     networks:
       - perpus-network
-
   loan-db:
     image: mysql:8.0
     environment:
@@ -119,7 +134,6 @@ services:
       - loan-db-data:/var/lib/mysql
     networks:
       - perpus-network
-
   # ===== RABBITMQ =====
   rabbitmq:
     image: rabbitmq:management
@@ -130,13 +144,12 @@ services:
       - rabbitmq-data:/var/lib/rabbitmq
     networks:
       - perpus-network
-
 networks:
   perpus-network:
     driver: bridge
-
 volumes:
   user-db-data:
   book-db-data:
   loan-db-data:
   rabbitmq-data:
+  gateway-db-data:
