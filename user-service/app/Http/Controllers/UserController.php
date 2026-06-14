@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -15,9 +16,13 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::find($id);
+
         if (!$user) {
-            return response()->json(['message' => 'User tidak ditemukan'], 404);
+            return response()->json([
+                'message' => 'User tidak ditemukan'
+            ], 404);
         }
+
         return response()->json($user);
     }
 
@@ -28,15 +33,26 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email|regex:/@gmail\.com$/'
         ]);
 
-        $user = User::create($request->all());
-        return response()->json($user, 201);
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => bcrypt('123456')
+        ]);
+
+        return response()->json([
+            'message' => 'User berhasil ditambahkan',
+            'data'    => $user
+        ], 201);
     }
 
     public function update(Request $request, $id)
     {
         $user = User::find($id);
+
         if (!$user) {
-            return response()->json(['message' => 'User tidak ditemukan'], 404);
+            return response()->json([
+                'message' => 'User tidak ditemukan'
+            ], 404);
         }
 
         $request->validate([
@@ -44,19 +60,25 @@ class UserController extends Controller
             'email' => "required|email|unique:users,email,{$id}|regex:/@gmail\.com$/"
         ]);
 
-        $user->update($request->only('name', 'email'));
+        $user->update([
+            'name'  => $request->name,
+            'email' => $request->email
+        ]);
+
         return response()->json([
             'message' => 'User berhasil diupdate',
             'data'    => $user
         ]);
     }
 
-    // ✅ GET riwayat peminjaman per user
     public function history($id)
     {
         $user = User::find($id);
+
         if (!$user) {
-            return response()->json(['message' => 'User tidak ditemukan'], 404);
+            return response()->json([
+                'message' => 'User tidak ditemukan'
+            ], 404);
         }
 
         $histories = LoanHistory::where('user_id', $id)
