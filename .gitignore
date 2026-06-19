@@ -7,4 +7,9 @@
 /loan-service/vendor
 /loan-service/.env
 
+/gateway-perpus/vendor
+/gateway-perpus/.env
+
 /node_modules
+
+.env.docker

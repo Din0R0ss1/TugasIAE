@@ -5,7 +5,7 @@ services:
       - "8000:8000"
     environment:
       - APP_ENV=local
-      - APP_KEY=base64:GENERATE_YOUR_KEY
+      - APP_KEY=${APP_KEY}
       - USER_SERVICE_URL=http://user-service:8000
       - BOOK_SERVICE_URL=http://book-service:8000
       - LOAN_SERVICE_URL=http://loan-service:8000
@@ -23,7 +23,7 @@ services:
       - "8001:8000"
     environment:
       - APP_ENV=local
-      - APP_KEY=base64:GENERATE_YOUR_KEY
+      - APP_KEY=${APP_KEY}
       - DB_HOST=user-db
       - DB_DATABASE=user_db
       - DB_USERNAME=root
@@ -40,7 +40,7 @@ services:
       - "8002:8000"
     environment:
       - APP_ENV=local
-      - APP_KEY=base64:GENERATE_YOUR_KEY
+      - APP_KEY=${APP_KEY}
       - DB_HOST=book-db
       - DB_DATABASE=book_db
       - DB_USERNAME=root
@@ -57,7 +57,7 @@ services:
       - "8003:8000"
     environment:
       - APP_ENV=local
-      - APP_KEY=base64:GENERATE_YOUR_KEY
+      - APP_KEY=${APP_KEY}
       - DB_HOST=loan-db
       - DB_DATABASE=loan_db
       - DB_USERNAME=root
@@ -73,7 +73,7 @@ services:
     build: ./book-service
     environment:
       - APP_ENV=local
-      - APP_KEY=base64:GENERATE_YOUR_KEY
+      - APP_KEY=${APP_KEY}
       - DB_HOST=book-db
       - DB_DATABASE=book_db
       - DB_USERNAME=root
@@ -92,7 +92,7 @@ services:
     build: ./user-service
     environment:
       - APP_ENV=local
-      - APP_KEY=base64:GENERATE_YOUR_KEY
+      - APP_KEY=${APP_KEY}
       - DB_HOST=user-db
       - DB_DATABASE=user_db
       - DB_USERNAME=root
