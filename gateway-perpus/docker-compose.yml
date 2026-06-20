@@ -1,0 +1,23 @@
+services:
+  gateway-service:
+    build: .
+    container_name: gateway-service
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=local
+      - APP_KEY=${APP_KEY}
+      - USER_SERVICE_URL=http://user-service:8000
+      - BOOK_SERVICE_URL=http://book-service:8000
+      - LOAN_SERVICE_URL=http://loan-service:8000
+    volumes:
+      - gateway-db-data:/app/database
+    networks:
+      - perpus-network
+
+networks:
+  perpus-network:
+    external: true
+
+volumes:
+  gateway-db-data:

@@ -1,0 +1,36 @@
+services:
+  user-service:
+    build: .
+    container_name: user-service
+    ports:
+      - "8001:8000"
+    environment:
+      - APP_ENV=local
+      - APP_KEY=${APP_KEY}
+      - DB_HOST=user-db
+      - DB_DATABASE=user_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - user-db
+    networks:
+      - perpus-network
+
+  user-db:
+    image: mysql:8.0
+    container_name: user-db
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: user_db
+    volumes:
+      - user-db-data:/var/lib/mysql
+    networks:
+      - perpus-network
+
+networks:
+  perpus-network:
+    external: true
+
+volumes:
+  user-db-data:

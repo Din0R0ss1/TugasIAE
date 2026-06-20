@@ -1,0 +1,54 @@
+services:
+  book-service:
+    build: .
+    container_name: book-service
+    ports:
+      - "8002:8000"
+    environment:
+      - APP_ENV=local
+      - APP_KEY=${APP_KEY}
+      - DB_HOST=book-db
+      - DB_DATABASE=book_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - book-db
+    networks:
+      - perpus-network
+
+  book-db:
+    image: mysql:8.0
+    container_name: book-db
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: book_db
+    volumes:
+      - book-db-data:/var/lib/mysql
+    networks:
+      - perpus-network
+
+  book-worker:
+    build: .
+    container_name: book-worker
+    command: bash -c "sleep 15 && php artisan queue:work --queue=book-loan --tries=3"
+    environment:
+      - APP_ENV=local
+      - APP_KEY=${APP_KEY}
+      - DB_HOST=book-db
+      - DB_DATABASE=book_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - QUEUE_CONNECTION=rabbitmq
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - book-db
+    networks:
+      - perpus-network
+
+networks:
+  perpus-network:
+    external: true
+
+volumes:
+  book-db-data:

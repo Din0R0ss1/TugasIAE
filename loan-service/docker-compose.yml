@@ -1,0 +1,53 @@
+services:
+  loan-service:
+    build: .
+    container_name: loan-service
+    ports:
+      - "8003:8000"
+    environment:
+      - APP_ENV=local
+      - APP_KEY=${APP_KEY}
+      - DB_HOST=loan-db
+      - DB_DATABASE=loan_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - loan-db
+    networks:
+      - perpus-network
+
+  loan-db:
+    image: mysql:8.0
+    container_name: loan-db
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: loan_db
+    volumes:
+      - loan-db-data:/var/lib/mysql
+    networks:
+      - perpus-network
+
+  loan-history-worker:
+    build: ../user-service
+    container_name: loan-history-worker
+    command: bash -c "sleep 15 && php artisan queue:work --queue=loan-history --tries=3"
+    environment:
+      - APP_ENV=local
+      - APP_KEY=${APP_KEY}
+      - DB_HOST=user-db
+      - DB_DATABASE=user_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - RABBITMQ_HOST=rabbitmq
+      - QUEUE_CONNECTION=rabbitmq
+      - CACHE_STORE=file
+    networks:
+      - perpus-network
+
+networks:
+  perpus-network:
+    external: true
+
+volumes:
+  loan-db-data:
