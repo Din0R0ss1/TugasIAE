@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LoanHistory extends Model
 {
@@ -18,4 +19,9 @@ class LoanHistory extends Model
         'loan_date'   => 'datetime',
         'return_date' => 'datetime',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

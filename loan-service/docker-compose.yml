@@ -12,6 +12,8 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=secret
       - RABBITMQ_HOST=rabbitmq
+      - HASURA_URL=http://hasura:8080
+      - HASURA_ADMIN_SECRET=myadminsecretkey
     depends_on:
       - loan-db
     networks:
@@ -31,7 +33,7 @@ services:
   loan-history-worker:
     build: ../user-service
     container_name: loan-history-worker
-    command: bash -c "sleep 15 && php artisan queue:work --queue=loan-history --tries=3"
+    command: bash -c "cp .env.example .env && sed -i 's/DB_HOST=127.0.0.1/DB_HOST=user-db/' .env && sleep 15 && php artisan queue:work --queue=loan-history --tries=3"
     environment:
       - APP_ENV=local
       - APP_KEY=${APP_KEY}

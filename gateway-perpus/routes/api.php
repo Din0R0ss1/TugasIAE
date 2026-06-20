@@ -20,63 +20,115 @@ Route::middleware('jwt.verify')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me',      [AuthController::class, 'me']);
 
-    // ========== BOOKS ==========
-    Route::get('/books', function () {
-        $res = Http::get('http://book-service:8000/api/books');
-        return response()->json($res->json(), $res->status());
+    // ========== BOOKS (via Hasura GraphQL) ==========
+    $hasuraUrl = env('HASURA_URL', 'http://hasura:8080') . '/v1/graphql';
+    $hasuraHeaders = [
+        'X-Hasura-Admin-Secret' => env('HASURA_ADMIN_SECRET', 'myadminsecretkey'),
+    ];
+
+    Route::get('/books', function () use ($hasuraUrl, $hasuraHeaders) {
+        $res = Http::withHeaders($hasuraHeaders)->post($hasuraUrl, [
+            'query' => '{ books { id judul penulis stok created_at updated_at } }',
+        ]);
+
+        return response()->json($res->json('data.books') ?? $res->json(), $res->status());
     });
 
-    Route::post('/books', function (Request $request) {
-        $res = Http::post(
-            'http://book-service:8000/api/books',
-            $request->all()
+    Route::post('/books', function (Request $request) use ($hasuraUrl, $hasuraHeaders) {
+        $res = Http::withHeaders($hasuraHeaders)->post($hasuraUrl, [
+            'query' => 'mutation ($object: books_insert_input!) { insert_books_one(object: $object) { id judul penulis stok created_at updated_at } }',
+            'variables' => [
+                'object' => $request->only(['judul', 'penulis', 'stok']),
+            ],
+        ]);
+
+        return response()->json(
+            $res->json('data.insert_books_one') ?? $res->json(),
+            $res->status()
         );
-
-        return response()->json($res->json(), $res->status());
     });
 
-    Route::put('/books/{id}', function (Request $request, $id) {
-        $res = Http::put(
-            "http://book-service:8000/api/books/{$id}",
-            $request->all()
+    Route::put('/books/{id}', function (Request $request, $id) use ($hasuraUrl, $hasuraHeaders) {
+        $res = Http::withHeaders($hasuraHeaders)->post($hasuraUrl, [
+            'query' => 'mutation ($id: bigint!, $set: books_set_input!) { update_books_by_pk(pk_columns: {id: $id}, _set: $set) { id judul penulis stok created_at updated_at } }',
+            'variables' => [
+                'id'  => (int) $id,
+                'set' => $request->only(['judul', 'penulis', 'stok']),
+            ],
+        ]);
+
+        return response()->json(
+            $res->json('data.update_books_by_pk') ?? $res->json(),
+            $res->status()
         );
-
-        return response()->json($res->json(), $res->status());
     });
 
-    // ========== USERS ==========
-    Route::get('/users', function () {
-        $res = Http::get('http://user-service:8000/api/users');
-        return response()->json($res->json(), $res->status());
+    // ========== USERS (via User Service GraphQL) ==========
+    $userGraphqlUrl = env('USER_SERVICE_URL', 'http://user-service:8000') . '/graphql';
+
+    Route::get('/users', function () use ($userGraphqlUrl) {
+        $res = Http::post($userGraphqlUrl, [
+            'query' => '{ users { id name email created_at updated_at } }',
+        ]);
+
+        return response()->json($res->json('data.users') ?? $res->json(), $res->status());
     });
 
-    Route::post('/users', function (Request $request) {
-        $res = Http::post(
-            'http://user-service:8000/api/users',
-            $request->all()
+    Route::post('/users', function (Request $request) use ($userGraphqlUrl, $hasuraHeaders) {
+        $res = Http::post($userGraphqlUrl, [
+            'query' => 'mutation ($name: String!, $email: String!, $password: String) { createUser(name: $name, email: $email, password: $password) { id name email created_at updated_at } }',
+            'variables' => [
+                'name'     => $request->input('name'),
+                'email'    => $request->input('email'),
+                'password' => $request->input('password', '123456'),
+            ],
+        ]);
+
+        return response()->json(
+            $res->json('data.createUser') ?? $res->json(),
+            $res->status()
         );
-
-        return response()->json($res->json(), $res->status());
     });
 
-    Route::put('/users/{id}', function (Request $request, $id) {
-        $res = Http::put(
-            "http://user-service:8000/api/users/{$id}",
-            $request->all()
+    Route::put('/users/{id}', function (Request $request, $id) use ($userGraphqlUrl) {
+        $res = Http::post($userGraphqlUrl, [
+            'query' => 'mutation ($id: ID!, $name: String!, $email: String!) { updateUser(id: $id, name: $name, email: $email) { id name email created_at updated_at } }',
+            'variables' => [
+                'id'    => $id,
+                'name'  => $request->input('name'),
+                'email' => $request->input('email'),
+            ],
+        ]);
+
+        return response()->json(
+            $res->json('data.updateUser') ?? $res->json(),
+            $res->status()
         );
-
-        return response()->json($res->json(), $res->status());
     });
 
-    Route::get('/users/{id}/history', function ($id) {
-        $res = Http::get(
-            "http://user-service:8000/api/users/{$id}/history"
-        );
+    Route::get('/users/{id}/history', function ($id) use ($userGraphqlUrl) {
+        $res = Http::post($userGraphqlUrl, [
+            'query' => 'query ($id: ID!) { user(id: $id) { id name email loan_histories { id book_id loan_id action loan_date return_date created_at } } }',
+            'variables' => ['id' => $id],
+        ]);
 
-        return response()->json($res->json(), $res->status());
+        $user = $res->json('data.user');
+
+        if (!$user) {
+            return response()->json(['message' => 'User tidak ditemukan'], 404);
+        }
+
+        return response()->json([
+            'user'    => [
+                'id'    => $user['id'],
+                'name'  => $user['name'],
+                'email' => $user['email'],
+            ],
+            'history' => $user['loan_histories'] ?? [],
+        ]);
     });
 
-    // ========== LOANS ==========
+    // ========== LOANS (via REST API) ==========
     Route::get('/loans', function () {
         $res = Http::get('http://loan-service:8000/api/loans');
         return response()->json($res->json(), $res->status());

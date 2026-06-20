@@ -8,7 +8,9 @@ services:
       - APP_ENV=local
       - APP_KEY=${APP_KEY}
       - USER_SERVICE_URL=http://user-service:8000
-      - BOOK_SERVICE_URL=http://book-service:8000
+      - BOOK_SERVICE_URL=http://hasura:8080
+      - HASURA_URL=http://hasura:8080
+      - HASURA_ADMIN_SECRET=myadminsecretkey
       - LOAN_SERVICE_URL=http://loan-service:8000
     volumes:
       - gateway-db-data:/app/database

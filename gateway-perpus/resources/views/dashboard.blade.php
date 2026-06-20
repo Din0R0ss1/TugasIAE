@@ -152,24 +152,23 @@ body {
     <aside class="sidebar">
         <div>
             <div class="sidebar-logo">
-                <span style="font-size:22px;">📚</span>
                 <span>SiPerpus</span>
             </div>
             <p id="adminName" class="admin-name"></p>
             <nav style="margin-top:8px;">
                 <button onclick="showTab('books', this)" class="menu active">
-                    <span class="menu-icon">📖</span> Buku
+                    <span class="menu-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span> Buku
                 </button>
                 <button onclick="showTab('users', this)" class="menu">
-                    <span class="menu-icon">👤</span> User
+                    <span class="menu-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> User
                 </button>
                 <button onclick="showTab('loans', this)" class="menu">
-                    <span class="menu-icon">🔄</span> Peminjaman
+                    <span class="menu-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"/></svg></span> Peminjaman
                 </button>
             </nav>
         </div>
         <button onclick="doLogout()" class="logout-btn">
-            🚪 Logout
+            Logout
         </button>
     </aside>
 
@@ -187,21 +186,21 @@ body {
         <!-- STATS -->
         <div class="stats-grid">
             <div class="stat-card stat-blue">
-                <div class="stat-icon">📚</div>
+                <div class="stat-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
                 <div>
                     <p class="stat-label">Total Buku</p>
                     <h2 id="totalBooks" class="stat-num">0</h2>
                 </div>
             </div>
             <div class="stat-card stat-purple">
-                <div class="stat-icon">👥</div>
+                <div class="stat-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
                 <div>
                     <p class="stat-label">Total User</p>
                     <h2 id="totalUsers" class="stat-num">0</h2>
                 </div>
             </div>
             <div class="stat-card stat-teal">
-                <div class="stat-icon">🔄</div>
+                <div class="stat-icon"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4"/></svg></div>
                 <div>
                     <p class="stat-label">Total Peminjaman</p>
                     <h2 id="totalLoans" class="stat-num">0</h2>
@@ -296,7 +295,7 @@ body {
 }
 .menu:hover { background: rgba(255,255,255,0.1); color: white; }
 .menu.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.4); }
-.menu-icon { font-size: 16px; }
+.menu-icon { font-size: 16px; display: inline-flex; align-items: center; }
 .logout-btn {
     width: 100%; padding: 11px;
     background: rgba(239,68,68,0.15);
@@ -331,7 +330,7 @@ body {
 .stat-blue    { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
 .stat-purple  { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
 .stat-teal    { background: linear-gradient(135deg, #06b6d4, #0891b2); }
-.stat-icon { font-size: 28px; }
+.stat-icon { font-size: 28px; display: flex; align-items: center; opacity: 0.9; }
 .stat-label { font-size: 12px; opacity: 0.85; }
 .stat-num { font-size: 28px; font-weight: 700; }
 
@@ -435,7 +434,7 @@ function showDashboard() {
 
     // tampilkan nama admin
     const name = localStorage.getItem('admin_name');
-    document.getElementById('adminName').innerText = `👋 Halo, ${name}`;
+    document.getElementById('adminName').innerText = `Halo, ${name}`;
 
     loadBooks();
     loadUsers();
@@ -575,8 +574,8 @@ async function loadBooks() {
             <td>${b.stok ?? '-'}</td>
             <td>
                 <button onclick="editBuku(${b.id}, '${b.judul}', '${b.penulis}', ${b.stok})"
-                    style="background:#fef9c3;color:#ca8a04;border:1px solid #fde68a;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
-                    ✏️ Edit</button>
+                    style="background:#fef9c3;color:#ca8a04;border:1px solid #fde68a;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
             </td>
         </tr>`;
     });
@@ -642,8 +641,8 @@ async function loadUsers() {
             <td>${u.email}</td>
             <td>
                 <button onclick="editUser(${u.id}, '${u.name}', '${u.email}')"
-                    style="background:#fef9c3;color:#ca8a04;border:1px solid #fde68a;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
-                    ✏️ Edit</button>
+                    style="background:#fef9c3;color:#ca8a04;border:1px solid #fde68a;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
             </td>
         </tr>`;
     });
@@ -655,7 +654,7 @@ async function tambahUser() {
 
     if (!name || !email) { alert("Isi semua field"); return; }
 
-    // 🔥 Validasi harus @gmail.com
+    // Validasi harus @gmail.com
     if (!email.endsWith('@gmail.com')) {
         alert("Email harus menggunakan @gmail.com");
         document.getElementById('emailUser').focus();
@@ -755,9 +754,9 @@ async function loadLoans() {
             <td>
                 ${l.status === 'dipinjam'
                     ? `<button onclick="kembalikan(${l.id})"
-                            style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
-                            ↩ Kembalikan</button>`
-                    : `<span style="color:#059669;font-size:13px;">✓ Selesai</span>`
+                            style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></svg> Kembalikan</button>`
+                    : `<span style="color:#059669;font-size:13px;display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Selesai</span>`
                 }
             </td>
         </tr>`;
