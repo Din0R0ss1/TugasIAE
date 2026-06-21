@@ -708,6 +708,19 @@ async function updateUser(id, name, email) {
 // ============================================================
 // LOANS
 // ============================================================
+function formatDateTime(isoString) {
+    if (!isoString) return '-';
+    const date = new Date(isoString);
+    return date.toLocaleString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+}
+
 async function loadLoans() {
     const [loanRes, userRes, bookRes] = await Promise.all([
         authFetch(`${BASE}/loans`),
@@ -748,8 +761,8 @@ async function loadLoans() {
         <tr>
             <td>${userMap[l.user_id] ?? 'Unknown'}</td>
             <td>${bookMap[l.book_id] ?? 'Unknown'}</td>
-            <td>${l.loan_date}</td>
-            <td>${l.return_date ?? '-'}</td>
+            <td>${formatDateTime(l.loan_date)}</td>
+            <td>${formatDateTime(l.return_date)}</td>
             <td><span class="${l.status === 'dipinjam' ? 'badge-dipinjam' : 'badge-selesai'}">${l.status}</span></td>
             <td>
                 ${l.status === 'dipinjam'

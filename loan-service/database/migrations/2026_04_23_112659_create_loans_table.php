@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('book_id');
-            $table->date('loan_date')->nullable();
-            $table->date('return_date')->nullable();
+            $table->dateTime('loan_date')->nullable();
+            $table->dateTime('return_date')->nullable();
             $table->string('status')->default('dipinjam');
             $table->timestamps();
         });
